@@ -1,0 +1,2 @@
+# FileReader plugin dependencies
+# Note: Most dependencies are provided by LangBot and GeneralParsers plugin

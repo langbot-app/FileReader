@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Plugin
+metadata:
+  author: wangcham
+  name: FileReader
+  repository: ''
+  version: 1.0.0
+  description:
+    en_US: 'File Reader - Read files sent by users and extract structured text for AI processing. Works with GeneralParsers plugin. Supports PDF, Word, Markdown, HTML, TXT and image files.'
+    zh_Hans: '文件阅读器 - 读取用户发送的文件并提取结构化文本供AI处理。需配合GeneralParsers插件使用。支持PDF、Word、Markdown、HTML、TXT和图片文件。'
+  label:
+    en_US: File Reader
+    zh_Hans: 文件阅读器
+  icon: assets/icon.svg
+
+spec:
+  config:
+    - name: default_prompt
+      label:
+        en_US: Default Prompt
+        zh_Hans: 默认提示词
+      type: string
+      required: false
+      description:
+        en_US: 'Default prompt template for processing file content. Use {content} as placeholder for file content.'
+        zh_Hans: '处理文件内容的默认提示词模板。使用 {content} 作为文件内容的占位符。'
+      default: '请阅读以下文件内容，并根据用户的要求进行处理：\n\n{content}'
+    
+    - name: summary_prompt
+      label:
+        en_US: Summary Prompt
+        zh_Hans: 总结提示词
+      type: string
+      required: false
+      description:
+        en_US: 'Prompt template for summarizing file content.'
+        zh_Hans: '用于总结文件内容的提示词模板。'
+      default: '请总结以下文件的主要内容：\n\n{content}'
+    
+    - name: translate_prompt
+      label:
+        en_US: Translate Prompt
+        zh_Hans: 翻译提示词
+      type: string
+      required: false
+      description:
+        en_US: 'Prompt template for translating file content. Use {language} as placeholder for target language.'
+        zh_Hans: '用于翻译文件内容的提示词模板。使用 {language} 作为目标语言的占位符。'
+      default: '请将以下文件内容翻译成{language}：\n\n{content}'
+    
+    - name: extract_prompt
+      label:
+        en_US: Extract Prompt
+        zh_Hans: 提取提示词
+      type: string
+      required: false
+      description:
+        en_US: 'Prompt template for extracting key information from file content.'
+        zh_Hans: '用于从文件内容中提取关键信息的提示词模板。'
+      default: '请从以下文件内容中提取关键信息：\n\n{content}'
+    
+    - name: qa_prompt
+      label:
+        en_US: Q&A Prompt
+        zh_Hans: 问答提示词
+      type: string
+      required: false
+      description:
+        en_US: 'Prompt template for Q&A based on file content. Use {question} as placeholder for user question.'
+        zh_Hans: '基于文件内容进行问答的提示词模板。使用 {question} 作为用户问题的占位符。'
+      default: '基于以下文件内容回答问题：\n\n文件内容：\n{content}\n\n问题：{question}'
+    
+    - name: max_content_length
+      label:
+        en_US: Max Content Length
+        zh_Hans: 最大内容长度
+      type: integer
+      required: false
+      description:
+        en_US: 'Maximum length of file content to process. Content exceeding this limit will be truncated.'
+        zh_Hans: '处理的文件内容最大长度。超过此限制的内容将被截断。'
+      default: 50000
+    
+    - name: auto_process
+      label:
+        en_US: Auto Process
+        zh_Hans: 自动处理
+      type: boolean
+      required: false
+      description:
+        en_US: 'Automatically process files when received without requiring explicit commands.'
+        zh_Hans: '收到文件时自动处理，无需显式命令。'
+      default: true
+
+  components: {}
+
+execution:
+  python:
+    path: main.py
+    attr: FileReaderPlugin
