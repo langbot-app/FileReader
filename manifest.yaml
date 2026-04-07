@@ -4,7 +4,7 @@ metadata:
   author: wangcham
   name: FileReader
   repository: ''
-  version: 1.0.0
+  version: 1.0.1
   description:
     en_US: 'File Reader - Read files sent by users and extract structured text for AI processing. Works with GeneralParsers plugin. Supports PDF, Word, Markdown, HTML, TXT and image files.'
     zh_Hans: '文件阅读器 - 读取用户发送的文件并提取结构化文本供AI处理。需配合GeneralParsers插件使用。支持PDF、Word、Markdown、HTML、TXT和图片文件。'
