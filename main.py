@@ -2,6 +2,16 @@
 # Please refer to https://docs.langbot.app/en/plugin/dev/tutor.html for more details.
 from __future__ import annotations
 
+import os
+import shutil
+import time
+import aiohttp
+import asyncio
+from pathlib import Path
+from datetime import datetime, timedelta
+from typing import Optional
+from urllib.parse import urlparse, unquote
+
 from langbot_plugin.api.definition.plugin import BasePlugin
 
 
@@ -14,6 +24,8 @@ class FileReaderPlugin(BasePlugin):
     2. 调用GeneralParsers插件解析文件内容
     3. 根据用户配置的prompt模板处理文件内容
     4. 支持多种处理模式：总结、翻译、提取、问答等
+    5. 支持自定义文件存储路径
+    6. 支持清除所有下载的文件
     
     使用方法：
     1. 安装GeneralParsers插件
@@ -24,4 +36,224 @@ class FileReaderPlugin(BasePlugin):
     
     async def initialize(self) -> None:
         """插件初始化"""
-        pass
+        # 确保存储目录存在
+        self._ensure_storage_dir()
+        # 启动时执行自动清理
+        await self._auto_clean_old_files()
+    
+    def _get_storage_path(self) -> Path:
+        """获取文件存储路径"""
+        custom_path = self.config.get("download_path", "")
+        if custom_path and custom_path.strip():
+            storage_path = Path(custom_path.strip())
+        else:
+            # 默认使用插件目录下的data文件夹
+            storage_path = Path(__file__).parent / "data/files"
+        return storage_path
+    
+    def _ensure_storage_dir(self) -> None:
+        """确保存储目录存在"""
+        storage_path = self._get_storage_path()
+        storage_path.mkdir(parents=True, exist_ok=True)
+    
+    async def download_file(self, url: str, filename: Optional[str] = None) -> str:
+        """
+        从URL下载文件到本地存储
+        
+        Args:
+            url: 文件的下载URL
+            filename: 可选的文件名，如果不提供则从URL中提取
+            
+        Returns:
+            下载后的本地文件路径
+        """
+        self._ensure_storage_dir()
+        storage_path = self._get_storage_path()
+        
+        # 如果没有提供文件名，从URL中提取
+        if not filename:
+            parsed_url = urlparse(url)
+            filename = unquote(os.path.basename(parsed_url.path))
+            if not filename:
+                # 如果URL中没有文件名，使用时间戳
+                filename = f"file_{int(time.time())}"
+        
+        # 确保文件名唯一
+        file_path = storage_path / filename
+        if file_path.exists():
+            name, ext = os.path.splitext(filename)
+            filename = f"{name}_{int(time.time())}{ext}"
+            file_path = storage_path / filename
+        
+        # 检查存储空间限制
+        await self._check_storage_limit()
+        
+        # 下载文件
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    content = await response.read()
+                    with open(file_path, 'wb') as f:
+                        f.write(content)
+                    return str(file_path)
+                else:
+                    raise Exception(f"下载文件失败，HTTP状态码: {response.status}")
+    
+    async def _check_storage_limit(self) -> None:
+        """检查并清理超出存储限制的文件"""
+        max_storage_mb = self.config.get("max_storage_mb", 500)
+        if max_storage_mb <= 0:
+            return
+        
+        storage_path = self._get_storage_path()
+        max_storage_bytes = max_storage_mb * 1024 * 1024
+        
+        # 获取所有文件及其信息
+        files_info = []
+        total_size = 0
+        
+        for file_path in storage_path.iterdir():
+            if file_path.is_file():
+                stat = file_path.stat()
+                files_info.append({
+                    'path': file_path,
+                    'size': stat.st_size,
+                    'mtime': stat.st_mtime
+                })
+                total_size += stat.st_size
+        
+        # 如果超出限制，删除最旧的文件
+        if total_size > max_storage_bytes:
+            # 按修改时间排序，最旧的在前
+            files_info.sort(key=lambda x: x['mtime'])
+            
+            for file_info in files_info:
+                if total_size <= max_storage_bytes:
+                    break
+                try:
+                    file_info['path'].unlink()
+                    total_size -= file_info['size']
+                except Exception:
+                    pass
+    
+    async def _auto_clean_old_files(self) -> None:
+        """自动清理过期文件"""
+        auto_clean_days = self.config.get("auto_clean_days", 7)
+        if auto_clean_days <= 0:
+            return
+        
+        storage_path = self._get_storage_path()
+        if not storage_path.exists():
+            return
+        
+        cutoff_time = datetime.now() - timedelta(days=auto_clean_days)
+        cutoff_timestamp = cutoff_time.timestamp()
+        
+        for file_path in storage_path.iterdir():
+            if file_path.is_file():
+                try:
+                    if file_path.stat().st_mtime < cutoff_timestamp:
+                        file_path.unlink()
+                except Exception:
+                    pass
+    
+    def clear_all_files(self) -> dict:
+        """
+        清除所有下载的文件
+        
+        Returns:
+            包含清理结果的字典
+        """
+        storage_path = self._get_storage_path()
+        
+        if not storage_path.exists():
+            return {
+                "success": True,
+                "message": "存储目录不存在，无需清理",
+                "deleted_count": 0,
+                "freed_space_mb": 0
+            }
+        
+        deleted_count = 0
+        freed_space = 0
+        errors = []
+        
+        for file_path in storage_path.iterdir():
+            if file_path.is_file():
+                try:
+                    file_size = file_path.stat().st_size
+                    file_path.unlink()
+                    deleted_count += 1
+                    freed_space += file_size
+                except Exception as e:
+                    errors.append(f"{file_path.name}: {str(e)}")
+        
+        return {
+            "success": len(errors) == 0,
+            "message": "清理完成" if len(errors) == 0 else f"清理完成，但有{len(errors)}个文件删除失败",
+            "deleted_count": deleted_count,
+            "freed_space_mb": round(freed_space / (1024 * 1024), 2),
+            "errors": errors if errors else None
+        }
+    
+    def get_storage_info(self) -> dict:
+        """
+        获取存储空间信息
+        
+        Returns:
+            包含存储信息的字典
+        """
+        storage_path = self._get_storage_path()
+        
+        if not storage_path.exists():
+            return {
+                "storage_path": str(storage_path),
+                "file_count": 0,
+                "total_size_mb": 0,
+                "max_storage_mb": self.config.get("max_storage_mb", 500),
+                "auto_clean_days": self.config.get("auto_clean_days", 7)
+            }
+        
+        file_count = 0
+        total_size = 0
+        
+        for file_path in storage_path.iterdir():
+            if file_path.is_file():
+                file_count += 1
+                total_size += file_path.stat().st_size
+        
+        return {
+            "storage_path": str(storage_path),
+            "file_count": file_count,
+            "total_size_mb": round(total_size / (1024 * 1024), 2),
+            "max_storage_mb": self.config.get("max_storage_mb", 500),
+            "auto_clean_days": self.config.get("auto_clean_days", 7)
+        }
+    
+    def list_files(self) -> list:
+        """
+        列出所有已下载的文件
+        
+        Returns:
+            文件信息列表
+        """
+        storage_path = self._get_storage_path()
+        
+        if not storage_path.exists():
+            return []
+        
+        files = []
+        for file_path in storage_path.iterdir():
+            if file_path.is_file():
+                stat = file_path.stat()
+                files.append({
+                    "name": file_path.name,
+                    "path": str(file_path),
+                    "size_mb": round(stat.st_size / (1024 * 1024), 2),
+                    "created_time": datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                    "modified_time": datetime.fromtimestamp(stat.st_mtime).isoformat()
+                })
+        
+        # 按修改时间排序，最新的在前
+        files.sort(key=lambda x: x['modified_time'], reverse=True)
+        return files

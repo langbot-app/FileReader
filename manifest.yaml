@@ -91,8 +91,55 @@ spec:
         en_US: 'Automatically process files when received without requiring explicit commands.'
         zh_Hans: '收到文件时自动处理，无需显式命令。'
       default: true
+    
+    - name: download_path
+      label:
+        en_US: Download Path
+        zh_Hans: 下载路径
+      type: string
+      required: false
+      description:
+        en_US: 'Custom path to save downloaded files. Leave empty to use default data/files directory.'
+        zh_Hans: '自定义文件下载保存路径。留空则使用默认的data/files目录。'
+      default: ''
+    
+    - name: auto_clean_days
+      label:
+        en_US: Auto Clean Days
+        zh_Hans: 自动清理天数
+      type: integer
+      required: false
+      description:
+        en_US: 'Automatically delete files older than this many days. Set to 0 to disable auto cleaning.'
+        zh_Hans: '自动删除超过指定天数的文件。设置为0则禁用自动清理。'
+      default: 7
+    
+    - name: max_storage_mb
+      label:
+        en_US: Max Storage (MB)
+        zh_Hans: 最大存储空间(MB)
+      type: integer
+      required: false
+      description:
+        en_US: 'Maximum storage space for downloaded files in MB. When exceeded, oldest files will be deleted.'
+        zh_Hans: '下载文件的最大存储空间（MB）。超过时将删除最旧的文件。'
+      default: 500
+    
+    - name: encoding_aes_key
+      label:
+        en_US: EncodingAESKey
+        zh_Hans: 消息加密密钥
+      type: string
+      required: false
+      description:
+        en_US: 'EncodingAESKey from WeCom bot settings. Required for decrypting files sent through WeCom. This is a 43-character Base64 encoded string.'
+        zh_Hans: '企业微信机器人设置中的EncodingAESKey。用于解密通过企业微信发送的文件。这是一个43字符的Base64编码字符串。'
+      default: ''
 
-  components: {}
+  components:
+    event_listener:
+      fromFiles:
+        - components/event_listener/file_handler.yaml
 
 execution:
   python:

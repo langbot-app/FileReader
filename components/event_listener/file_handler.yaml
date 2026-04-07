@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: EventListener
+metadata:
+  name: file_handler
+  label:
+    en_US: File Handler
+    zh_Hans: 文件处理器
+spec:
+execution:
+  python:
+    path: file_handler.py
+    attr: FileReaderEventListener

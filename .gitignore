@@ -45,5 +45,5 @@ venv.bak/
 # Workspace
 .workspace/
 *.log
-
+/data
 /claw

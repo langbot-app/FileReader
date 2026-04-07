@@ -1,2 +1,6 @@
 # FileReader plugin dependencies
 # Note: Most dependencies are provided by LangBot and GeneralParsers plugin
+aiohttp>=3.8.0
+chardet>=5.0.0
+# pycryptodome is required for decrypting WeCom encrypted files
+pycryptodome>=3.15.0
