@@ -26,7 +26,7 @@ FileReader is a LangBot plugin that reads files sent by users and extracts struc
 
 ### Basic Usage
 
-1. Send a file (PDF, Word, image, etc.) directly to the bot
+1. In private chat, send a file (PDF, Word, image, etc.) directly to the bot. In group chat, send the file first, then @mention the bot while quoting/replying to the file.
 2. The plugin will automatically parse the file content and show a preview
 3. Then you can ask AI questions about the file content
 
