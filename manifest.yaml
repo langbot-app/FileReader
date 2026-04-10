@@ -3,7 +3,7 @@ kind: Plugin
 metadata:
   author: wangcham
   name: FileReader
-  repository: ''
+  repository: 'https://github.com/langbot-app/FileReader'
   version: 1.1.0
   description:
     en_US: 'File Reader - Read files sent by users and extract structured text for AI processing. Works with GeneralParsers plugin. Supports PDF, Word, Markdown, HTML, TXT and image files. Currently only supports WeCom intelligent bot, DingTalk bot, and Feishu bot.'
