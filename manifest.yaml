@@ -4,10 +4,10 @@ metadata:
   author: wangcham
   name: FileReader
   repository: ''
-  version: 1.0.1
+  version: 1.1.0
   description:
-    en_US: 'File Reader - Read files sent by users and extract structured text for AI processing. Works with GeneralParsers plugin. Supports PDF, Word, Markdown, HTML, TXT and image files.'
-    zh_Hans: '文件阅读器 - 读取用户发送的文件并提取结构化文本供AI处理。需配合GeneralParsers插件使用。支持PDF、Word、Markdown、HTML、TXT和图片文件。'
+    en_US: 'File Reader - Read files sent by users and extract structured text for AI processing. Works with GeneralParsers plugin. Supports PDF, Word, Markdown, HTML, TXT and image files. Currently only supports WeCom intelligent bot, DingTalk bot, and Feishu bot.'
+    zh_Hans: '文件阅读器 - 读取用户发送的文件并提取结构化文本供AI处理。需配合GeneralParsers插件使用。支持PDF、Word、Markdown、HTML、TXT和图片文件。目前仅支持企业微信智能机器人、钉钉机器人和飞书机器人。'
   label:
     en_US: File Reader
     zh_Hans: 文件阅读器

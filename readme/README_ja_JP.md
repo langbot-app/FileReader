@@ -1,6 +1,6 @@
 # FileReader - ファイルリーダープラグイン
 
-> **注意**: 現在、企業微信（WeCom）スマートボットのみ対応しています。
+> **注意**: 現在、企業微信（WeCom）スマートボット、DingTalk ボット、Feishu ボットのみ対応しています。
 
 FileReader は LangBot プラグインで、ユーザーが送信したファイルを読み取り、AI 処理用の構造化テキストを抽出します。[GeneralParsers](https://space.langbot.app/market/langbot-team/GeneralParsers) プラグインと連携して、様々なファイル形式の解析をサポートします。
 

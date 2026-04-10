@@ -1,6 +1,6 @@
 # FileReader - File Reader Plugin
 
-> **Note**: Currently only supports WeCom (Enterprise WeChat) Intelligent Bot.
+> **Note**: Currently only supports WeCom (Enterprise WeChat) Intelligent Bot, DingTalk Bot, and Feishu Bot.
 
 FileReader is a LangBot plugin that reads files sent by users and extracts structured text for AI processing. It works with the [GeneralParsers](https://space.langbot.app/market/langbot-team/GeneralParsers) plugin to support parsing of various file formats.
 

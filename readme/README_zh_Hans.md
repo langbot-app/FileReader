@@ -1,6 +1,6 @@
 # FileReader - 文件阅读器插件
 
-> **注意**: 目前仅支持企业微信智能机器人。
+> **注意**: 目前仅支持企业微信智能机器人,钉钉机器人和飞书机器人。
 
 FileReader 是一个 LangBot 插件，用于读取用户发送的文件并提取结构化文本供 AI 处理。它与 [GeneralParsers](https://space.langbot.app/market/langbot-team/GeneralParsers) 插件配合使用，支持多种文件格式的解析。
 
